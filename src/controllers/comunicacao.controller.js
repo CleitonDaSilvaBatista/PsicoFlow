@@ -1,0 +1,2 @@
+const s=require('../services/comunicacao.service'); const h=fn=>async(req,res)=>{try{const r=await fn(req);res.status(req.method==='POST'?201:200).json(r)}catch(e){res.status(400).json({error:e.message})}};
+exports.enviar=h(req=>s.enviar(req.body,req.user)); exports.listar=h(req=>s.listar(req.user)); exports.marcarLida=h(req=>s.marcarLida(req.params.id,req.user)); exports.usuarios=h(()=>s.usuarios());

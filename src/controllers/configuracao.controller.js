@@ -1,0 +1,1 @@
+const s=require('../services/configuracao.service'); exports.buscar=async(req,res)=>res.json(await s.buscar()); exports.salvar=async(req,res)=>{try{res.json(await s.salvar(req.body))}catch(e){res.status(400).json({error:e.message})}};

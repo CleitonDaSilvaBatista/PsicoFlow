@@ -1,0 +1,1 @@
+const router=require('express').Router(); const auth=require('../middlewares/auth.middleware'); const c=require('../controllers/lembrete.controller'); router.use(auth); router.get('/',c.listar); router.post('/',c.criar); router.put('/:id',c.atualizar); router.post('/gerar-automaticos',c.gerar); module.exports=router;

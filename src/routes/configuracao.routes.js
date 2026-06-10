@@ -1,0 +1,1 @@
+const router=require('express').Router(); const auth=require('../middlewares/auth.middleware'); const role=require('../middlewares/role.middleware'); const c=require('../controllers/configuracao.controller'); router.get('/clinica',auth,c.buscar); router.put('/clinica',auth,role('ADMIN'),c.salvar); module.exports=router;

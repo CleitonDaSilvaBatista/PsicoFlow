@@ -1,0 +1,1 @@
+const router=require('express').Router(); const auth=require('../middlewares/auth.middleware'); const c=require('../controllers/comunicacao.controller'); router.use(auth); router.get('/',c.listar); router.post('/',c.enviar); router.patch('/:id/lida',c.marcarLida); router.get('/usuarios/lista',c.usuarios); module.exports=router;

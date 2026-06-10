@@ -1,0 +1,1 @@
+const s=require('../services/backup.service'); const h=fn=>async(req,res)=>{try{res.json(await fn(req))}catch(e){res.status(400).json({error:e.message})}}; exports.exportar=h(req=>s.exportarJson(req.user)); exports.historico=h(()=>s.historico());

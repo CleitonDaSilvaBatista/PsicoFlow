@@ -1,0 +1,2 @@
+const s=require('../services/espaco.service'); const h=fn=>async(req,res)=>{try{const r=await fn(req);res.status(req.method==='POST'?201:200).json(r)}catch(e){res.status(400).json({error:e.message})}};
+exports.criar=h(req=>s.criarEspaco(req.body)); exports.listar=h(()=>s.listarEspacos()); exports.atualizar=h(req=>s.atualizarEspaco(req.params.id,req.body)); exports.remover=h(req=>s.removerEspaco(req.params.id)); exports.reservar=h(req=>s.reservar(req.body)); exports.reservas=h(()=>s.listarReservas());

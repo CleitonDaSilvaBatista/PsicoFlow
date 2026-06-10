@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PSICOLOGO
+  PACIENTE
+}
+
+enum StatusSessao {
+  PENDENTE
+  CONFIRMADA
+  REALIZADA
+  CANCELADA
+}
+
+enum StatusFinanceiro {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
+
+enum TipoDespesa {
+  FIXA
+  VARIAVEL
+}
+
+enum StatusPlanoPaciente {
+  ATIVO
+  ENCERRADO
+  CANCELADO
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role     @default(PACIENTE)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pacientesCriados      Paciente[] @relation("CriadorPaciente")
+  sessoesComoPsicologo  Sessao[]   @relation("PsicologoSessao")
+  documentosCriados     Documento[] @relation("UsuarioDocumentos")
+  mensagensEnviadas     Mensagem[] @relation("MensagensEnviadas")
+  mensagensRecebidas    Mensagem[] @relation("MensagensRecebidas")
+  tarefasResponsavel    Tarefa[] @relation("UsuarioTarefas")
+}
+
+model Paciente {
+  id             Int       @id @default(autoincrement())
+  nome           String
+  cpf            String?   @unique
+  email          String?
+  telefone       String?
+  dataNascimento DateTime?
+  endereco       String?
+  observacoes    String?
+
+  criadoPorId    Int?
+  criadoPor      User?     @relation("CriadorPaciente", fields: [criadoPorId], references: [id])
+
+  convenioId     Int?
+  convenio       Convenio? @relation(fields: [convenioId], references: [id])
+
+  sessoes        Sessao[]
+  prontuarios    Prontuario[]
+  receitas       Receita[]
+  planos         PlanoPaciente[]
+  documentos     Documento[]
+  lembretes      Lembrete[]
+  tarefas        Tarefa[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Sessao {
+  id           Int          @id @default(autoincrement())
+  dataHora     DateTime
+  tipo         String?
+  status       StatusSessao @default(PENDENTE)
+  valor        Decimal?     @db.Decimal(10, 2)
+  observacoes  String?
+
+  pacienteId   Int
+  paciente     Paciente     @relation(fields: [pacienteId], references: [id])
+
+  psicologoId  Int?
+  psicologo    User?        @relation("PsicologoSessao", fields: [psicologoId], references: [id])
+
+  prontuario   Prontuario?
+  receitas     Receita[]
+  documentos   Documento[]
+  lembretes    Lembrete[]
+  reservaEspaco ReservaEspaco?
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Prontuario {
+  id           Int      @id @default(autoincrement())
+  anamnese     String?
+  evolucao     String
+  observacoes  String?
+
+  pacienteId   Int
+  paciente     Paciente @relation(fields: [pacienteId], references: [id])
+
+  sessaoId     Int?     @unique
+  sessao       Sessao?  @relation(fields: [sessaoId], references: [id])
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model Convenio {
+  id                  Int       @id @default(autoincrement())
+  nome                String    @unique
+  percentualCobertura Float     @default(70)
+  percentualPaciente  Float     @default(30)
+  diaRepasse          Int?
+  ativo               Boolean   @default(true)
+  observacoes         String?
+  pacientes           Paciente[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Plano {
+  id                Int             @id @default(autoincrement())
+  nome              String
+  quantidadeSessoes Int
+  valor             Decimal         @db.Decimal(10, 2)
+  descontoPercentual Float          @default(0)
+  ativo             Boolean         @default(true)
+  descricao         String?
+  pacientes         PlanoPaciente[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model PlanoPaciente {
+  id                  Int                 @id @default(autoincrement())
+  pacienteId           Int
+  paciente             Paciente            @relation(fields: [pacienteId], references: [id])
+  planoId              Int
+  plano                Plano               @relation(fields: [planoId], references: [id])
+  sessoesContratadas   Int
+  sessoesUtilizadas    Int                 @default(0)
+  dataInicio           DateTime            @default(now())
+  dataFim              DateTime?
+  status               StatusPlanoPaciente @default(ATIVO)
+  observacoes          String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+model Receita {
+  id             Int              @id @default(autoincrement())
+  descricao      String
+  valor          Decimal          @db.Decimal(10, 2)
+  dataPagamento  DateTime         @default(now())
+  formaPagamento String?
+  categoria      String?          @default("Sessão")
+  status         StatusFinanceiro @default(PAGO)
+  observacoes    String?
+
+  pacienteId     Int?
+  paciente       Paciente?        @relation(fields: [pacienteId], references: [id])
+
+  sessaoId       Int?
+  sessao         Sessao?          @relation(fields: [sessaoId], references: [id])
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Despesa {
+  id             Int              @id @default(autoincrement())
+  descricao      String
+  valor          Decimal          @db.Decimal(10, 2)
+  dataPagamento  DateTime         @default(now())
+  categoria      String?
+  tipo           TipoDespesa      @default(VARIAVEL)
+  status         StatusFinanceiro @default(PAGO)
+  observacoes    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+
+enum StatusTarefa {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+enum PrioridadeTarefa {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+enum TipoDocumento {
+  RECIBO
+  CONTRATO
+  LAUDO
+  RELATORIO
+  OUTRO
+}
+
+enum StatusLembrete {
+  PENDENTE
+  ENVIADO
+  CANCELADO
+}
+
+enum StatusEspaco {
+  ATIVO
+  INATIVO
+  MANUTENCAO
+}
+
+model Documento {
+  id          Int           @id @default(autoincrement())
+  titulo      String
+  tipo        TipoDocumento @default(OUTRO)
+  conteudo    String?
+  modelo      String?
+  arquivoUrl  String?
+  tamanhoKb   Int?
+  pacienteId  Int?
+  paciente    Paciente?     @relation(fields: [pacienteId], references: [id])
+  sessaoId    Int?
+  sessao      Sessao?       @relation(fields: [sessaoId], references: [id])
+  criadoPorId Int?
+  criadoPor   User?         @relation("UsuarioDocumentos", fields: [criadoPorId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Mensagem {
+  id            Int      @id @default(autoincrement())
+  assunto       String?
+  conteudo      String
+  remetenteId   Int
+  remetente     User     @relation("MensagensEnviadas", fields: [remetenteId], references: [id])
+  destinatarioId Int
+  destinatario  User     @relation("MensagensRecebidas", fields: [destinatarioId], references: [id])
+  lida          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Lembrete {
+  id          Int            @id @default(autoincrement())
+  titulo      String
+  mensagem    String
+  canal       String         @default("EMAIL")
+  enviarEm    DateTime
+  status      StatusLembrete @default(PENDENTE)
+  pacienteId  Int?
+  paciente    Paciente?      @relation(fields: [pacienteId], references: [id])
+  sessaoId    Int?
+  sessao      Sessao?        @relation(fields: [sessaoId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Tarefa {
+  id            Int              @id @default(autoincrement())
+  titulo        String
+  descricao     String?
+  status        StatusTarefa     @default(PENDENTE)
+  prioridade    PrioridadeTarefa @default(MEDIA)
+  prazo         DateTime?
+  pacienteId    Int?
+  paciente      Paciente?        @relation(fields: [pacienteId], references: [id])
+  responsavelId Int?
+  responsavel   User?            @relation("UsuarioTarefas", fields: [responsavelId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model Espaco {
+  id          Int          @id @default(autoincrement())
+  nome        String       @unique
+  descricao   String?
+  capacidade  Int?
+  recursos    String?
+  status      StatusEspaco @default(ATIVO)
+  reservas    ReservaEspaco[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ReservaEspaco {
+  id          Int      @id @default(autoincrement())
+  espacoId    Int
+  espaco      Espaco   @relation(fields: [espacoId], references: [id])
+  sessaoId    Int?     @unique
+  sessao      Sessao?  @relation(fields: [sessaoId], references: [id])
+  inicio      DateTime
+  fim         DateTime
+  observacoes String?
+  createdAt   DateTime @default(now())
+
+  @@index([espacoId, inicio, fim])
+}
+
+model ConfiguracaoClinica {
+  id        Int      @id @default(1)
+  nome      String?
+  cnpj      String?
+  telefone  String?
+  email     String?
+  endereco  String?
+  updatedAt DateTime @updatedAt
+}
+
+model BackupRegistro {
+  id        Int      @id @default(autoincrement())
+  tipo      String   @default("EXPORTACAO")
+  formato   String   @default("JSON")
+  caminho   String?
+  status    String   @default("GERADO")
+  criadoPor String?
+  createdAt DateTime @default(now())
+}

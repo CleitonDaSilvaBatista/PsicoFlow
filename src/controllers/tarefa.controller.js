@@ -1,0 +1,2 @@
+const s=require('../services/tarefa.service'); const h=fn=>async(req,res)=>{try{const r=await fn(req);res.status(req.method==='POST'?201:200).json(r)}catch(e){res.status(400).json({error:e.message})}};
+exports.criar=h(req=>s.criar(req.body,req.user)); exports.listar=h(req=>s.listar(req.user)); exports.buscar=h(req=>s.buscar(req.params.id,req.user)); exports.atualizar=h(req=>s.atualizar(req.params.id,req.body,req.user)); exports.remover=h(req=>s.remover(req.params.id,req.user));

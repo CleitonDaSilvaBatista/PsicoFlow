@@ -1,0 +1,1 @@
+const router=require('express').Router(); const auth=require('../middlewares/auth.middleware'); const role=require('../middlewares/role.middleware'); const c=require('../controllers/backup.controller'); router.use(auth,role('ADMIN')); router.get('/exportar-json',c.exportar); router.get('/historico',c.historico); module.exports=router;
