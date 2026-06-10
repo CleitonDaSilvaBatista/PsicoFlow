@@ -1,41 +1,83 @@
-# PsicoFlow — Frontend Organizado
+# PsicoFlow — Sistema de Gestão para Clínica Psicológica
 
-Projeto frontend estático separado em HTML, CSS e JavaScript.
+Projeto desenvolvido para a Atividade Final de IHC — Interface Homem Computador.
 
-## Estrutura
+## Objetivo
 
-```text
-psicoflow-organizado/
-├── index.html
-├── assets/
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   │   └── app.js
-│   └── img/
-└── docs/
-```
+Desenvolver uma aplicação web para gestão de clínica psicológica, integrando processos clínicos, administrativos e financeiros.
+
+## Principais Módulos
+
+- Autenticação e controle de acesso
+- Pacientes
+- Agenda e sessões
+- Prontuários
+- Financeiro
+- Planos
+- Convênios
+- Dashboard
+- Relatórios
+- Tarefas
+- Documentos
+- Comunicação
+- Espaços
+- Backup
+
+## Tecnologias
+
+- HTML, CSS e JavaScript
+- Bootstrap
+- Chart.js
+- Node.js
+- Express
+- PostgreSQL
+- Prisma ORM
+- JWT
+- Bcrypt
 
 ## Como rodar
 
-Abra o arquivo `index.html` no navegador ou use a extensão Live Server do VS Code.
+```bash
+npm install
+npx prisma migrate dev
+npx prisma generate
+npm run seed
+npm start
+```
 
-## Observação
+Acesse:
 
-O projeto ainda usa CDNs para Bootstrap, Bootstrap Icons, Google Fonts e Chart.js.
-Para apresentar no SENAI, abra com internet ativa para carregar os ícones, fontes e gráficos.
+```text
+http://localhost:3000
+```
 
+## Login de Teste
 
-## Módulos adicionados nesta versão
+```text
+admin@psicoflow.com.br
+123456
+```
 
-- Autenticação com JWT
-- Pacientes
-- Sessões/Agenda
-- Prontuários
-- Financeiro: receitas, despesas, fluxo e resumo
-- Convênios: cadastro e vínculo com paciente
-- Planos: pacotes de sessões e controle de saldo
-- Relatórios: financeiro, operacional, clínico e completo
-- Dashboard com métricas reais do banco
+## Documentação
 
-Para testar as rotas, consulte `README_API_TESTES.md`.
+A documentação completa está na pasta `docs/`:
+
+```text
+docs/
+├── 01-arquitetura-funcionalidades.md
+├── 02-modelagem-banco.md
+├── 03-rotas-api.md
+├── 04-manual-execucao.md
+├── 05-roteiro-demonstracao.md
+└── 06-checklist-entrega.md
+```
+
+## Requisitos da Entrega
+
+O projeto contempla:
+
+- Banco de dados modelado com relacionamentos adequados
+- Interface web navegável com rotas funcionando
+- Relatório e dashboard implementados
+- Demonstração funcional
+- Documentação técnica
