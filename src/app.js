@@ -18,6 +18,7 @@ const espacoRoutes = require('./routes/espaco.routes');
 const lembreteRoutes = require('./routes/lembrete.routes');
 const backupRoutes = require('./routes/backup.routes');
 const configuracaoRoutes = require('./routes/configuracao.routes');
+const auditoriaRoutes = require('./routes/auditoria.routes');
 
 
 const app = express();
@@ -52,4 +53,5 @@ app.use('/api/espacos', espacoRoutes);
 app.use('/api/lembretes', lembreteRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/configuracoes', configuracaoRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
 module.exports = app;

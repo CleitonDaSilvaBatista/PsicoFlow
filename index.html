@@ -15,6 +15,21 @@
 <!-- ██████████ TOAST CONTAINER ██████████ -->
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- Modal de mensagens do sistema: substitui alerts/toasts simples -->
+<div class="modal-overlay" id="modalFeedback">
+  <div class="modal-box" style="width:420px;">
+    <div class="modal-header">
+      <h3 id="modalFeedbackTitle"><i id="modalFeedbackIcon" class="bi bi-info-circle-fill me-2"></i>Mensagem</h3>
+      <button class="modal-close" onclick="closeModal('modalFeedback')">✕</button>
+    </div>
+    <p id="modalFeedbackBody" style="color:var(--text-2);font-size:.92rem;line-height:1.5;margin-bottom:20px;white-space:pre-wrap;">Mensagem do sistema.</p>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn-sm-custom btn-primary-sm" onclick="closeModal('modalFeedback')">Entendi</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ██████████ MODAL CONFIRM ██████████ -->
 <div class="modal-overlay" id="modalConfirm">
   <div class="modal-box">
@@ -988,7 +1003,7 @@
           <div id="pf-documentos" class="tab-content-panel">
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;"><i class="bi bi-file-earmark-pdf-fill" style="color:var(--danger);font-size:1.3rem;"></i><div style="flex:1;"><div style="font-size:.85rem;font-weight:600;">Contrato de Prestação de Serviços.pdf</div><div style="font-size:.73rem;color:var(--text-3);">245 KB · Janeiro 2025</div></div><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button></div>
-              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;"><i class="bi bi-file-earmark-word-fill" style="color:var(--primary);font-size:1.3rem;"></i><div style="flex:1;"><div style="font-size:.85rem;font-weight:600;">Pacientemnese Inicial.docx</div><div style="font-size:.73rem;color:var(--text-3);">88 KB · Janeiro 2025</div></div><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;"><i class="bi bi-file-earmark-word-fill" style="color:var(--primary);font-size:1.3rem;"></i><div style="flex:1;"><div style="font-size:.85rem;font-weight:600;">Anamnese Inicial.docx</div><div style="font-size:.73rem;color:var(--text-3);">88 KB · Janeiro 2025</div></div><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button></div>
             </div>
           </div>
 
@@ -1031,7 +1046,7 @@
         </div>
         <div class="card-custom">
           <div class="tabs-custom">
-            <button class="tab-btn active" onclick="switchTab('prn','anamnese')">Pacientemnese</button>
+            <button class="tab-btn active" onclick="switchTab('prn','anamnese')">Anamnese</button>
             <button class="tab-btn" onclick="switchTab('prn','evolucoes')">Evoluções</button>
             <button class="tab-btn" onclick="switchTab('prn','obs')">Obs. Clínicas</button>
           </div>
@@ -1050,7 +1065,7 @@
             </div>
             <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
               <button class="btn-sm-custom btn-outline-sm">Cancelar</button>
-              <button class="btn-sm-custom btn-primary-sm" onclick="showToast('Pacientemnese salva!','success')"><i class="bi bi-check2"></i> Salvar anamnese</button>
+              <button class="btn-sm-custom btn-primary-sm" onclick="showToast('Anamnese salva!','success')"><i class="bi bi-check2"></i> Salvar anamnese</button>
             </div>
           </div>
 
@@ -1294,7 +1309,7 @@
             <tbody>
               <tr><td><div style="display:flex;align-items:center;gap:8px;"><i class="bi bi-file-earmark-pdf-fill" style="color:var(--danger);font-size:1.1rem;"></i>Contrato_Paciente_2025.pdf</div></td><td><span class="badge-custom badge-danger">PDF</span></td><td>Paciente carregado do banco</td><td>10/01/2025</td><td>245 KB</td><td><div style="display:flex;gap:4px;"><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button><button class="btn-sm-custom btn-outline-sm"><i class="bi bi-eye"></i></button></div></td></tr>
               <tr><td><div style="display:flex;align-items:center;gap:8px;"><i class="bi bi-file-earmark-pdf-fill" style="color:var(--danger);font-size:1.1rem;"></i>Laudo_Psicologico_PacienteMendes.pdf</div></td><td><span class="badge-custom badge-danger">PDF</span></td><td>Paciente</td><td>08/02/2025</td><td>320 KB</td><td><div style="display:flex;gap:4px;"><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button><button class="btn-sm-custom btn-outline-sm"><i class="bi bi-eye"></i></button></div></td></tr>
-              <tr><td><div style="display:flex;align-items:center;gap:8px;"><i class="bi bi-file-earmark-word-fill" style="color:var(--primary);font-size:1.1rem;"></i>Pacientemnese_PacienteOliveira.docx</div></td><td><span class="badge-custom badge-primary">DOCX</span></td><td>Paciente</td><td>05/01/2025</td><td>88 KB</td><td><div style="display:flex;gap:4px;"><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button><button class="btn-sm-custom btn-outline-sm"><i class="bi bi-eye"></i></button></div></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:8px;"><i class="bi bi-file-earmark-word-fill" style="color:var(--primary);font-size:1.1rem;"></i>Anamnese_PacienteOliveira.docx</div></td><td><span class="badge-custom badge-primary">DOCX</span></td><td>Paciente</td><td>05/01/2025</td><td>88 KB</td><td><div style="display:flex;gap:4px;"><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button><button class="btn-sm-custom btn-outline-sm"><i class="bi bi-eye"></i></button></div></td></tr>
               <tr><td><div style="display:flex;align-items:center;gap:8px;"><i class="bi bi-file-earmark-excel-fill" style="color:var(--success);font-size:1.1rem;"></i>Relatorio_Faturamento_Jan2025.xlsx</div></td><td><span class="badge-custom badge-success">XLSX</span></td><td>— Clínica —</td><td>01/02/2025</td><td>156 KB</td><td><div style="display:flex;gap:4px;"><button class="btn-sm-custom btn-outline-sm" onclick="showToast('Download iniciado','success')"><i class="bi bi-download"></i></button><button class="btn-sm-custom btn-outline-sm"><i class="bi bi-eye"></i></button></div></td></tr>
             </tbody>
           </table>
@@ -1675,7 +1690,7 @@
     <div class="modal-header"><h3><i class="bi bi-file-medical me-2"></i>Novo Prontuário</h3><button class="modal-close" onclick="closeModal('modalProntuarioApi')">✕</button></div>
     <div class="mb-3"><label class="form-label">Paciente</label><select id="prontuarioPacienteId" class="form-control"></select></div>
     <div class="mb-3"><label class="form-label">Sessão</label><select id="prontuarioSessaoId" class="form-control"><option value="">Sem sessão vinculada</option></select></div>
-    <div class="mb-3"><label class="form-label">Pacientemnese</label><textarea id="prontuarioPacientemnese" class="form-control" rows="2"></textarea></div>
+    <div class="mb-3"><label class="form-label">Anamnese</label><textarea id="prontuarioAnamnese" class="form-control" rows="2"></textarea></div>
     <div class="mb-3"><label class="form-label">Evolução</label><textarea id="prontuarioEvolucao" class="form-control" rows="3" placeholder="Campo obrigatório"></textarea></div>
     <div class="mb-3"><label class="form-label">Observações</label><textarea id="prontuarioObs" class="form-control" rows="2"></textarea></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -1721,6 +1736,93 @@
     <div class="row g-2 mb-3"><div class="col-6"><label class="form-label">Cobertura %</label><input id="convenioCobertura" type="number" class="form-control" value="70"></div><div class="col-6"><label class="form-label">Paciente %</label><input id="convenioPaciente" type="number" class="form-control" value="30"></div></div>
     <div class="mb-3"><label class="form-label">Observações</label><textarea id="convenioObs" class="form-control" rows="2"></textarea></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalConvenioApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarConvenioApi()">Salvar convênio</button></div>
+  </div>
+</div>
+
+
+
+<!-- MODAIS COMPLEMENTARES COM PERSISTÊNCIA REAL NO BANCO -->
+<div class="modal-overlay" id="modalDocumentoApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-file-earmark-plus me-2"></i>Novo Documento</h3><button class="modal-close" onclick="closeModal('modalDocumentoApi')">✕</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><label class="form-label">Título</label><input id="documentoTitulo" class="form-control" placeholder="Ex.: Recibo de pagamento"></div>
+      <div class="col-6"><label class="form-label">Tipo</label><select id="documentoTipo" class="form-control"><option>RECIBO</option><option>CONTRATO</option><option>LAUDO</option><option>RELATORIO</option><option selected>OUTRO</option></select></div>
+      <div class="col-6"><label class="form-label">Tamanho (KB)</label><input id="documentoTamanho" type="number" class="form-control" placeholder="Opcional"></div>
+      <div class="col-12"><label class="form-label">Paciente</label><select id="documentoPacienteId" class="form-control"><option value="">Documento geral da clínica</option></select></div>
+      <div class="col-12"><label class="form-label">Sessão</label><select id="documentoSessaoId" class="form-control"><option value="">Sem sessão vinculada</option></select></div>
+      <div class="col-12"><label class="form-label">Conteúdo</label><textarea id="documentoConteudo" class="form-control" rows="3" placeholder="Descreva o documento ou cole o texto do modelo"></textarea></div>
+      <div class="col-12"><label class="form-label">URL/arquivo</label><input id="documentoArquivoUrl" class="form-control" placeholder="Opcional: link do arquivo armazenado"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalDocumentoApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarDocumentoApi()">Salvar documento</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalTarefaApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-kanban me-2"></i>Nova Tarefa</h3><button class="modal-close" onclick="closeModal('modalTarefaApi')">✕</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><label class="form-label">Título</label><input id="tarefaTitulo" class="form-control" placeholder="Ex.: Enviar formulário de anamnese"></div>
+      <div class="col-12"><label class="form-label">Descrição</label><textarea id="tarefaDescricao" class="form-control" rows="2"></textarea></div>
+      <div class="col-6"><label class="form-label">Prioridade</label><select id="tarefaPrioridade" class="form-control"><option>BAIXA</option><option selected>MEDIA</option><option>ALTA</option></select></div>
+      <div class="col-6"><label class="form-label">Status</label><select id="tarefaStatus" class="form-control"><option selected>PENDENTE</option><option>EM_ANDAMENTO</option><option>CONCLUIDA</option><option>CANCELADA</option></select></div>
+      <div class="col-6"><label class="form-label">Prazo</label><input id="tarefaPrazo" type="date" class="form-control"></div>
+      <div class="col-6"><label class="form-label">Paciente</label><select id="tarefaPacienteId" class="form-control"><option value="">Sem paciente</option></select></div>
+      <div class="col-12"><label class="form-label">Responsável</label><select id="tarefaResponsavelId" class="form-control"><option value="">Usuário logado</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalTarefaApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarTarefaApi()">Salvar tarefa</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalSalaApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-door-open me-2"></i>Nova Sala</h3><button class="modal-close" onclick="closeModal('modalSalaApi')">✕</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><label class="form-label">Nome da sala</label><input id="salaNome" class="form-control" placeholder="Ex.: Sala 01"></div>
+      <div class="col-6"><label class="form-label">Capacidade</label><input id="salaCapacidade" type="number" class="form-control" placeholder="Ex.: 3"></div>
+      <div class="col-6"><label class="form-label">Status</label><select id="salaStatus" class="form-control"><option selected>ATIVO</option><option>INATIVO</option><option>MANUTENCAO</option></select></div>
+      <div class="col-12"><label class="form-label">Recursos</label><input id="salaRecursos" class="form-control" placeholder="Ex.: Divã, ar-condicionado, mesa"></div>
+      <div class="col-12"><label class="form-label">Descrição</label><textarea id="salaDescricao" class="form-control" rows="2"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalSalaApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarSalaApi()">Salvar sala</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalMensagemApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-chat-dots me-2"></i>Nova Mensagem</h3><button class="modal-close" onclick="closeModal('modalMensagemApi')">✕</button></div>
+    <div class="mb-3"><label class="form-label">Destinatário</label><select id="mensagemDestinatarioId" class="form-control"></select></div>
+    <div class="mb-3"><label class="form-label">Assunto</label><input id="mensagemAssunto" class="form-control" placeholder="Opcional"></div>
+    <div class="mb-3"><label class="form-label">Mensagem</label><textarea id="mensagemConteudo" class="form-control" rows="4" placeholder="Digite a mensagem"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalMensagemApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarMensagemApi()">Enviar mensagem</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalAtribuirPlanoApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-person-check me-2"></i>Atribuir Plano ao Paciente</h3><button class="modal-close" onclick="closeModal('modalAtribuirPlanoApi')">✕</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><label class="form-label">Paciente</label><select id="atribuirPlanoPacienteId" class="form-control"></select></div>
+      <div class="col-12"><label class="form-label">Plano</label><select id="atribuirPlanoPlanoId" class="form-control"></select></div>
+      <div class="col-6"><label class="form-label">Sessões contratadas</label><input id="atribuirPlanoSessoes" type="number" class="form-control" placeholder="Usa padrão do plano"></div>
+      <div class="col-6"><label class="form-label">Data final</label><input id="atribuirPlanoDataFim" type="date" class="form-control"></div>
+      <div class="col-12"><label class="form-label">Observações</label><textarea id="atribuirPlanoObs" class="form-control" rows="2"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalAtribuirPlanoApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarAtribuirPlanoApi()">Atribuir plano</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalClinicaApi">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="bi bi-building me-2"></i>Dados da Clínica</h3><button class="modal-close" onclick="closeModal('modalClinicaApi')">✕</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><label class="form-label">Nome</label><input id="clinicaNome" class="form-control"></div>
+      <div class="col-6"><label class="form-label">CNPJ</label><input id="clinicaCnpj" class="form-control"></div>
+      <div class="col-6"><label class="form-label">Telefone</label><input id="clinicaTelefone" class="form-control"></div>
+      <div class="col-12"><label class="form-label">E-mail</label><input id="clinicaEmail" class="form-control"></div>
+      <div class="col-12"><label class="form-label">Endereço</label><input id="clinicaEndereco" class="form-control"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-sm-custom btn-outline-sm" onclick="closeModal('modalClinicaApi')">Cancelar</button><button class="btn-sm-custom btn-primary-sm" onclick="salvarClinicaApi()">Salvar configurações</button></div>
   </div>
 </div>
 

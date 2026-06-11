@@ -228,18 +228,46 @@ function toggleSidebar() {
 }
 
 // ── MODALS ─────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.add('open');
+}
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove('open');
+}
 document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); }));
 
-// ── TOAST ──────────────────────────────────────────────────
+// ── MODAL DE MENSAGENS ─────────────────────────────────────
+function showModalMessage(msg, type='info', title='') {
+  const modal = document.getElementById('modalFeedback');
+  const titleEl = document.getElementById('modalFeedbackTitle');
+  const iconEl = document.getElementById('modalFeedbackIcon');
+  const bodyEl = document.getElementById('modalFeedbackBody');
+
+  if (!modal || !titleEl || !iconEl || !bodyEl) {
+    console.log(msg);
+    return;
+  }
+
+  const config = {
+    success: { title: 'Sucesso', icon: 'bi-check-circle-fill', color: 'var(--success)' },
+    danger:  { title: 'Atenção', icon: 'bi-exclamation-circle-fill', color: 'var(--danger)' },
+    error:   { title: 'Erro', icon: 'bi-exclamation-circle-fill', color: 'var(--danger)' },
+    warning: { title: 'Aviso', icon: 'bi-exclamation-triangle-fill', color: 'var(--warning)' },
+    info:    { title: 'Informação', icon: 'bi-info-circle-fill', color: 'var(--primary)' }
+  }[type] || { title: 'Informação', icon: 'bi-info-circle-fill', color: 'var(--primary)' };
+
+  iconEl.className = `bi ${config.icon} me-2`;
+  iconEl.style.color = config.color;
+  titleEl.innerHTML = `<i id="modalFeedbackIcon" class="bi ${config.icon} me-2" style="color:${config.color}"></i>${title || config.title}`;
+  bodyEl.textContent = msg || 'Operação concluída.';
+  openModal('modalFeedback');
+}
+
+// Compatibilidade: todos os pontos antigos que chamavam showToast agora abrem modal.
 function showToast(msg, type='') {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast-msg ${type}`;
-  t.innerHTML = `<i class="bi bi-${type==='success'?'check-circle-fill':type==='danger'?'exclamation-circle-fill':'info-circle-fill'}"></i> ${msg}`;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+  showModalMessage(msg, type || 'info');
 }
 
 // ── TABS ───────────────────────────────────────────────────
@@ -287,7 +315,8 @@ function switchCfg(name) {
 
 // ── SEARCH ─────────────────────────────────────────────────
 function handleSearch(v) {
-  if (v.length > 1) showToast(`Buscando: "${v}"...`);
+  // Busca global ainda não executa consulta remota; evita abrir modal a cada tecla digitada.
+  if (v.length > 1) console.log(`Buscando: "${v}"...`);
 }
 
 // ── CHARTS ─────────────────────────────────────────────────
@@ -1156,7 +1185,7 @@ async function pfLoadDocumentos(){
   const page=document.getElementById('page-documentos'); if(!page) return;
   const docs=await apiRequest('/documentos').catch(()=>[]);
   const grupos={CONTRATO:0,LAUDO:0,RELATORIO:0,RECIBO:0,OUTRO:0}; docs.forEach(d=>grupos[d.tipo]=(grupos[d.tipo]||0)+1);
-  page.innerHTML = `<div class="page-header"><h1>Módulo de Documentos</h1><div style="display:flex;gap:8px;"><button class="btn-custom btn-outline-custom" onclick="showToast('Funcionalidade conectada ao backend. Use POST /api/documentos para cadastrar.','success')"><i class="bi bi-folder-plus"></i> Nova pasta</button><button class="btn-custom btn-primary-custom" onclick="showToast('Documento deve ser cadastrado pelo endpoint /api/documentos.','success')"><i class="bi bi-plus"></i> Novo documento</button></div></div>
+  page.innerHTML = `<div class="page-header"><h1>Módulo de Documentos</h1><div style="display:flex;gap:8px;"><button class="btn-custom btn-outline-custom" onclick="abrirModalDocumentoApi()"><i class="bi bi-folder-plus"></i> Nova pasta</button><button class="btn-custom btn-primary-custom" onclick="abrirModalDocumentoApi()"><i class="bi bi-plus"></i> Novo documento</button></div></div>
   <div class="stats-grid" style="margin-bottom:20px;">${['CONTRATO','LAUDO','RELATORIO','RECIBO'].map(t=>`<div class="stat-card"><div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div><div class="stat-title">${t}</div><div class="stat-value">${grupos[t]||0}</div></div>`).join('')}</div>
   ${pfCard('Documentos Recentes', pfTable(['Nome','Tipo','Paciente','Data','Tamanho'], docs.map(d=>`<tr><td>${pfSafe(d.titulo)}</td><td><span class="badge-custom badge-primary">${d.tipo}</span></td><td>${pfSafe(d.paciente?.nome || '— Clínica —')}</td><td>${pfDate(d.createdAt)}</td><td>${d.tamanhoKb?d.tamanhoKb+' KB':'-'}</td></tr>`)))}`;
 }
@@ -1164,7 +1193,7 @@ async function pfLoadDocumentos(){
 async function pfLoadComunicacao(){
   const page=document.getElementById('page-comunicacao'); if(!page) return;
   const msgs=await apiRequest('/comunicacao').catch(()=>[]); const me=getUser();
-  page.innerHTML = `<div class="page-header"><h1>Central de Comunicação</h1><button class="btn-custom btn-primary-custom" onclick="showToast('Envie mensagens pelo endpoint POST /api/comunicacao.','success')"><i class="bi bi-plus"></i> Nova mensagem</button></div>
+  page.innerHTML = `<div class="page-header"><h1>Central de Comunicação</h1><button class="btn-custom btn-primary-custom" onclick="abrirModalMensagemApi()"><i class="bi bi-plus"></i> Nova mensagem</button></div>
   <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;">${pfCard('Caixa de entrada', msgs.length?msgs.map(m=>`<div style="padding:12px;border-bottom:1px solid var(--border);"><strong>${pfSafe(m.remetenteId===me.id?m.destinatario?.nome:m.remetente?.nome)}</strong><div style="font-size:.8rem;color:var(--text-3);">${pfDateTime(m.createdAt)}</div><p style="font-size:.88rem;margin:6px 0 0;">${pfSafe(m.conteudo)}</p></div>`).join(''):'<div style="text-align:center;color:var(--text-3);padding:20px;">Nenhuma mensagem no banco.</div>')}
   ${pfCard('Conversa', msgs[0]?msgs.slice(0,8).reverse().map(m=>`<div style="display:flex;justify-content:${m.remetenteId===me.id?'flex-end':'flex-start'};margin:8px 0;"><div style="max-width:70%;padding:10px 14px;border-radius:12px;background:${m.remetenteId===me.id?'var(--primary)':'var(--bg)'};color:${m.remetenteId===me.id?'white':'var(--text-1)'};">${pfSafe(m.conteudo)}<div style="font-size:.7rem;opacity:.7;margin-top:4px;">${pfDateTime(m.createdAt)}</div></div></div>`).join(''):'<div style="text-align:center;color:var(--text-3);padding:80px 20px;">As conversas reais aparecerão aqui.</div>')}</div>`;
 }
@@ -1172,14 +1201,14 @@ async function pfLoadComunicacao(){
 async function pfLoadTarefas(){
   const page=document.getElementById('page-tarefas'); if(!page) return;
   const tarefas=await apiRequest('/tarefas').catch(()=>[]);
-  page.innerHTML = `<div class="page-header"><h1>Módulo de Tarefas</h1><button class="btn-custom btn-primary-custom" onclick="showToast('Crie tarefas pelo endpoint POST /api/tarefas.','success')"><i class="bi bi-plus"></i> Nova tarefa</button></div>
+  page.innerHTML = `<div class="page-header"><h1>Módulo de Tarefas</h1><button class="btn-custom btn-primary-custom" onclick="abrirModalTarefaApi()"><i class="bi bi-plus"></i> Nova tarefa</button></div>
   ${pfCard('Tarefas cadastradas', pfTable(['Tarefa','Paciente','Responsável','Prioridade','Status','Prazo'], tarefas.map(t=>`<tr><td>${pfSafe(t.titulo)}<div style="font-size:.75rem;color:var(--text-3);">${pfSafe(t.descricao||'')}</div></td><td>${pfSafe(t.paciente?.nome||'-')}</td><td>${pfSafe(t.responsavel?.nome||'-')}</td><td>${t.prioridade}</td><td><span class="badge-custom badge-primary">${t.status}</span></td><td>${pfDate(t.prazo)}</td></tr>`)))}`;
 }
 
 async function pfLoadSalas(){
   const page=document.getElementById('page-salas'); if(!page) return;
   const espacos=await apiRequest('/espacos').catch(()=>[]);
-  page.innerHTML = `<div class="page-header"><h1>Gestão de Espaços</h1><button class="btn-custom btn-primary-custom" onclick="showToast('Cadastre salas pelo endpoint POST /api/espacos.','success')"><i class="bi bi-plus"></i> Nova sala</button></div>
+  page.innerHTML = `<div class="page-header"><h1>Gestão de Espaços</h1><button class="btn-custom btn-primary-custom" onclick="abrirModalSalaApi()"><i class="bi bi-plus"></i> Nova sala</button></div>
   ${pfCard('Salas e recursos', pfTable(['Sala','Capacidade','Recursos','Status','Reservas'], espacos.map(e=>`<tr><td>${pfSafe(e.nome)}<div style="font-size:.75rem;color:var(--text-3);">${pfSafe(e.descricao||'')}</div></td><td>${e.capacidade||'-'}</td><td>${pfSafe(e.recursos||'-')}</td><td>${e.status}</td><td>${e.reservas?.length||0}</td></tr>`)))}`;
 }
 
@@ -1238,7 +1267,7 @@ function pfEmpty(msg='Nenhum dado cadastrado no banco.'){
   return `<div class="card-custom" style="padding:28px;text-align:center;color:var(--text-3);">${msg}</div>`;
 }
 function pfActionToast(endpoint){
-  showToast(`Funcionalidade conectada ao backend. Use ${endpoint}.`, 'success');
+  return pfActionToast(endpoint);
 }
 async function pfGet(path, fallback=[]){
   try { return await apiRequest(path); } catch(e){ console.warn('API falhou:', path, e); return fallback; }
@@ -1326,5 +1355,318 @@ carregarDadosDaPagina = async function(pageId){
   };
   if(direct[pageId]) { await direct[pageId](); return; }
   await pfLoaderBackendOriginal(pageId).catch(e => console.warn('Loader antigo falhou:', e));
+  limparElementosComTextoEstatico(document.getElementById(pageId) || document);
+};
+
+// ───────────────────────────────────────────────────────────
+// CORREÇÃO REAL DOS FORMULÁRIOS: botões abrem modais e salvam no banco
+// ───────────────────────────────────────────────────────────
+function pfVal(id){ return document.getElementById(id)?.value?.trim() || ''; }
+function pfNumVal(id){ const v = pfVal(id); return v === '' ? undefined : Number(v); }
+function pfMaybeNum(id){ const v = pfVal(id); return v ? Number(v) : null; }
+function pfIsoFromDateInput(id){ const v = pfVal(id); return v ? new Date(v + 'T00:00:00').toISOString() : null; }
+function pfIsoFromDateTimeInput(id){ const v = pfVal(id); return v ? new Date(v).toISOString() : null; }
+function pfPageMain(id){ return document.querySelector(`#${id} main`) || document.getElementById(id); }
+function pfRole(){ return (getUser()?.role || '').toUpperCase(); }
+function pfCanAdmin(){ return pfRole() === 'ADMIN'; }
+function pfCanClinical(){ return ['ADMIN','PSICOLOGO'].includes(pfRole()); }
+
+async function carregarUsuariosOptions(selectId){
+  const select = document.getElementById(selectId);
+  if(!select) return [];
+  const usuarios = await apiRequest('/comunicacao/usuarios/lista').catch(()=>[]);
+  const me = getUser();
+  select.innerHTML = '<option value="">Selecione...</option>' + usuarios
+    .filter(u => u.id !== me.id)
+    .map(u => `<option value="${u.id}">${pfSafe(u.nome)} (${pfSafe(u.role)})</option>`).join('');
+  return usuarios;
+}
+
+async function carregarPlanosOptions(selectId){
+  const select = document.getElementById(selectId);
+  if(!select) return [];
+  const planos = await apiRequest('/planos').catch(()=>[]);
+  select.innerHTML = '<option value="">Selecione...</option>' + planos.map(p => `<option value="${p.id}" data-qtd="${p.quantidadeSessoes || ''}">${pfSafe(p.nome)} - ${pfMoney(p.valor)}</option>`).join('');
+  return planos;
+}
+
+async function abrirModalDocumentoApi(){
+  ['documentoTitulo','documentoTamanho','documentoConteudo','documentoArquivoUrl'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  await carregarPacientesOptions('documentoPacienteId').catch(()=>{});
+  const pacSel = document.getElementById('documentoPacienteId');
+  if(pacSel && !pacSel.querySelector('option[value=""]')) pacSel.insertAdjacentHTML('afterbegin','<option value="">Documento geral da clínica</option>');
+  await carregarSessoesOptions('documentoSessaoId').catch(()=>{});
+  openModal('modalDocumentoApi');
+}
+
+async function salvarDocumentoApi(){
+  try{
+    const titulo = pfVal('documentoTitulo');
+    if(!titulo) return showToast('Informe o título do documento.', 'danger');
+    const body = {
+      titulo,
+      tipo: pfVal('documentoTipo') || 'OUTRO',
+      conteudo: pfVal('documentoConteudo') || undefined,
+      arquivoUrl: pfVal('documentoArquivoUrl') || undefined,
+      tamanhoKb: pfNumVal('documentoTamanho'),
+      pacienteId: pfMaybeNum('documentoPacienteId'),
+      sessaoId: pfMaybeNum('documentoSessaoId')
+    };
+    await apiRequest('/documentos', { method:'POST', body: JSON.stringify(body) });
+    closeModal('modalDocumentoApi');
+    showToast('Documento salvo no banco!', 'success');
+    await pfRenderDocumentos();
+  }catch(error){ showToast(error.message || 'Erro ao salvar documento.', 'danger'); }
+}
+
+async function abrirModalTarefaApi(){
+  ['tarefaTitulo','tarefaDescricao','tarefaPrazo'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  await carregarPacientesOptions('tarefaPacienteId').catch(()=>{});
+  const pacSel = document.getElementById('tarefaPacienteId');
+  if(pacSel && !pacSel.querySelector('option[value=""]')) pacSel.insertAdjacentHTML('afterbegin','<option value="">Sem paciente</option>');
+  await carregarUsuariosOptions('tarefaResponsavelId').catch(()=>{});
+  const resp = document.getElementById('tarefaResponsavelId');
+  if(resp){
+    resp.insertAdjacentHTML('afterbegin','<option value="">Usuário logado</option>');
+    resp.value = getUser()?.id || '';
+  }
+  openModal('modalTarefaApi');
+}
+
+async function salvarTarefaApi(){
+  try{
+    const titulo = pfVal('tarefaTitulo');
+    if(!titulo) return showToast('Informe o título da tarefa.', 'danger');
+    const body = {
+      titulo,
+      descricao: pfVal('tarefaDescricao') || undefined,
+      prioridade: pfVal('tarefaPrioridade') || 'MEDIA',
+      status: pfVal('tarefaStatus') || 'PENDENTE',
+      prazo: pfIsoFromDateInput('tarefaPrazo'),
+      pacienteId: pfMaybeNum('tarefaPacienteId'),
+      responsavelId: pfMaybeNum('tarefaResponsavelId') || getUser()?.id || null
+    };
+    await apiRequest('/tarefas', { method:'POST', body: JSON.stringify(body) });
+    closeModal('modalTarefaApi');
+    showToast('Tarefa salva no banco!', 'success');
+    await pfRenderTarefas();
+  }catch(error){ showToast(error.message || 'Erro ao salvar tarefa.', 'danger'); }
+}
+
+async function abrirModalSalaApi(){
+  ['salaNome','salaCapacidade','salaRecursos','salaDescricao'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const status=document.getElementById('salaStatus'); if(status) status.value='ATIVO';
+  openModal('modalSalaApi');
+}
+
+async function salvarSalaApi(){
+  try{
+    if(!pfCanAdmin()) return showToast('Apenas administrador pode cadastrar salas.', 'danger');
+    const nome = pfVal('salaNome');
+    if(!nome) return showToast('Informe o nome da sala.', 'danger');
+    const body = {
+      nome,
+      capacidade: pfNumVal('salaCapacidade'),
+      recursos: pfVal('salaRecursos') || undefined,
+      descricao: pfVal('salaDescricao') || undefined,
+      status: pfVal('salaStatus') || 'ATIVO'
+    };
+    await apiRequest('/espacos', { method:'POST', body: JSON.stringify(body) });
+    closeModal('modalSalaApi');
+    showToast('Sala salva no banco!', 'success');
+    await pfRenderSalas();
+  }catch(error){ showToast(error.message || 'Erro ao salvar sala.', 'danger'); }
+}
+
+async function abrirModalMensagemApi(){
+  ['mensagemAssunto','mensagemConteudo'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  await carregarUsuariosOptions('mensagemDestinatarioId');
+  openModal('modalMensagemApi');
+}
+
+async function salvarMensagemApi(){
+  try{
+    const destinatarioId = pfMaybeNum('mensagemDestinatarioId');
+    const conteudo = pfVal('mensagemConteudo');
+    if(!destinatarioId) return showToast('Selecione o destinatário.', 'danger');
+    if(!conteudo) return showToast('Digite a mensagem.', 'danger');
+    await apiRequest('/comunicacao', { method:'POST', body: JSON.stringify({ destinatarioId, assunto: pfVal('mensagemAssunto') || undefined, conteudo }) });
+    closeModal('modalMensagemApi');
+    showToast('Mensagem enviada e salva no banco!', 'success');
+    await pfRenderComunicacao();
+  }catch(error){ showToast(error.message || 'Erro ao enviar mensagem.', 'danger'); }
+}
+
+async function abrirModalAtribuirPlanoApi(){
+  await carregarPacientesOptions('atribuirPlanoPacienteId');
+  await carregarPlanosOptions('atribuirPlanoPlanoId');
+  ['atribuirPlanoSessoes','atribuirPlanoDataFim','atribuirPlanoObs'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  openModal('modalAtribuirPlanoApi');
+}
+
+async function salvarAtribuirPlanoApi(){
+  try{
+    const pacienteId = pfMaybeNum('atribuirPlanoPacienteId');
+    const planoId = pfMaybeNum('atribuirPlanoPlanoId');
+    if(!pacienteId || !planoId) return showToast('Selecione paciente e plano.', 'danger');
+    const body = {
+      pacienteId,
+      planoId,
+      sessoesContratadas: pfNumVal('atribuirPlanoSessoes'),
+      dataFim: pfIsoFromDateInput('atribuirPlanoDataFim'),
+      observacoes: pfVal('atribuirPlanoObs') || undefined
+    };
+    await apiRequest('/planos/atribuir', { method:'POST', body: JSON.stringify(body) });
+    closeModal('modalAtribuirPlanoApi');
+    showToast('Plano atribuído ao paciente e salvo no banco!', 'success');
+    await pfRenderPlanos();
+  }catch(error){ showToast(error.message || 'Erro ao atribuir plano.', 'danger'); }
+}
+
+async function abrirModalClinicaApi(){
+  const c = await apiRequest('/configuracoes/clinica').catch(()=>({}));
+  ['Nome','Cnpj','Telefone','Email','Endereco'].forEach(k => {
+    const id='clinica'+k;
+    const key=k.charAt(0).toLowerCase()+k.slice(1);
+    const el=document.getElementById(id);
+    if(el) el.value = c?.[key] || '';
+  });
+  openModal('modalClinicaApi');
+}
+
+async function salvarClinicaApi(){
+  try{
+    if(!pfCanAdmin()) return showToast('Apenas administrador pode alterar dados da clínica.', 'danger');
+    await apiRequest('/configuracoes/clinica', { method:'PUT', body: JSON.stringify({
+      nome: pfVal('clinicaNome') || undefined,
+      cnpj: pfVal('clinicaCnpj') || undefined,
+      telefone: pfVal('clinicaTelefone') || undefined,
+      email: pfVal('clinicaEmail') || undefined,
+      endereco: pfVal('clinicaEndereco') || undefined
+    })});
+    closeModal('modalClinicaApi');
+    showToast('Configurações da clínica salvas no banco!', 'success');
+    await pfRenderConfiguracoes();
+  }catch(error){ showToast(error.message || 'Erro ao salvar clínica.', 'danger'); }
+}
+
+// Corrige o prontuário para usar o campo anamnese real e não o id errado do protótipo.
+salvarProntuarioApi = async function(){
+  try {
+    const pacienteId = pfMaybeNum('prontuarioPacienteId');
+    const evolucao = pfVal('prontuarioEvolucao');
+    if (!pacienteId || !evolucao) return showToast('Paciente e evolução são obrigatórios.', 'danger');
+    const body = {
+      pacienteId,
+      sessaoId: pfMaybeNum('prontuarioSessaoId'),
+      anamnese: pfVal('prontuarioAnamnese') || undefined,
+      evolucao,
+      observacoes: pfVal('prontuarioObs') || undefined
+    };
+    await apiRequest('/prontuarios', { method: 'POST', body: JSON.stringify(body) });
+    closeModal('modalProntuarioApi');
+    showToast('Prontuário salvo no banco!', 'success');
+    await carregarProntuarios();
+    await carregarDashboard().catch(()=>{});
+  } catch (error) { showToast(error.message || 'Erro ao salvar prontuário.', 'danger'); }
+};
+
+async function pfRenderDocumentos(){
+  const main = pfPageMain('page-documentos'); if(!main) return;
+  const docs = await pfGet('/documentos', []);
+  const grupos = { RECIBO:0, CONTRATO:0, LAUDO:0, RELATORIO:0, OUTRO:0 };
+  docs.forEach(d => grupos[d.tipo] = (grupos[d.tipo] || 0) + 1);
+  const actions = pfCanClinical() ? `<button class="btn-sm-custom btn-primary-sm" onclick="abrirModalDocumentoApi()"><i class="bi bi-plus-lg"></i> Novo documento</button>` : '';
+  main.innerHTML = pfHeader('Módulo de Documentos', actions) +
+    `<div class="row g-3 mb-4">${Object.entries(grupos).map(([tipo,total]) => `<div class="col-md-3"><div class="card-custom" style="text-align:center;padding:16px;"><i class="bi bi-file-earmark-text" style="font-size:2rem;color:var(--primary);display:block;margin-bottom:8px;"></i><div style="font-weight:600;font-size:.9rem;">${tipo}</div><div style="font-size:1.4rem;font-weight:700;color:var(--text-1);">${total}</div></div></div>`).join('')}</div>` +
+    pfCard('Documentos Recentes', pfTable(['Nome','Tipo','Paciente','Sessão','Data','Tamanho'], docs.map(d => `<tr><td>${pfSafe(d.titulo)}</td><td>${pfBadge(d.tipo)}</td><td>${pfSafe(d.paciente?.nome || '— Clínica —')}</td><td>${d.sessao ? pfDateTime(d.sessao.dataHora) : '-'}</td><td>${pfDate(d.createdAt)}</td><td>${d.tamanhoKb ? d.tamanhoKb + ' KB' : '-'}</td></tr>`), 'Nenhum documento cadastrado no banco para este usuário.'));
+}
+
+async function pfRenderComunicacao(){
+  const main = pfPageMain('page-comunicacao'); if(!main) return;
+  const msgs = await pfGet('/comunicacao', []);
+  const me = getUser();
+  const lista = msgs.length ? msgs.map(m => {
+    const outro = m.remetenteId === me.id ? m.destinatario : m.remetente;
+    return `<div style="padding:12px;border-bottom:1px solid var(--border);"><div style="font-weight:700;color:var(--text-1);">${pfSafe(outro?.nome || 'Usuário')}</div><div style="font-size:.75rem;color:var(--text-3);">${pfDateTime(m.createdAt)}</div><div style="font-size:.88rem;color:var(--text-2);margin-top:5px;">${pfSafe(m.conteudo)}</div></div>`;
+  }).join('') : '<div style="text-align:center;color:var(--text-3);padding:28px;">Nenhuma mensagem cadastrada no banco.</div>';
+  const conversa = msgs.length ? msgs.slice().reverse().slice(0,12).map(m => {
+    const mine = m.remetenteId === me.id;
+    return `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:8px 0;"><div style="max-width:75%;padding:10px 14px;border-radius:12px;background:${mine?'var(--primary)':'var(--bg)'};color:${mine?'#fff':'var(--text-1)'};">${pfSafe(m.conteudo)}<div style="font-size:.7rem;opacity:.75;margin-top:4px;">${pfDateTime(m.createdAt)}</div></div></div>`;
+  }).join('') : '<div style="height:330px;display:flex;align-items:center;justify-content:center;color:var(--text-3);text-align:center;">As conversas reais aparecerão aqui quando existirem mensagens no backend.</div>';
+  main.innerHTML = pfHeader('Central de Comunicação', `<button class="btn-sm-custom btn-primary-sm" onclick="abrirModalMensagemApi()"><i class="bi bi-plus-lg"></i> Nova mensagem</button>`) +
+    `<div class="row g-3"><div class="col-lg-4">${pfCard('Caixa de entrada', lista)}</div><div class="col-lg-8">${pfCard('Conversa', conversa + '<div style="display:flex;gap:8px;margin-top:16px;"><input class="form-control" placeholder="Clique em Nova mensagem para enviar" readonly><button class="btn-sm-custom btn-primary-sm" onclick="abrirModalMensagemApi()"><i class="bi bi-send-fill"></i></button></div>')}</div></div>`;
+}
+
+async function pfRenderTarefas(){
+  const main = pfPageMain('page-tarefas'); if(!main) return;
+  const tarefas = await pfGet('/tarefas', []);
+  main.innerHTML = pfHeader('Módulo de Tarefas', `<button class="btn-sm-custom btn-primary-sm" onclick="abrirModalTarefaApi()"><i class="bi bi-plus-lg"></i> Nova tarefa</button>`) +
+    pfCard('Tarefas cadastradas', pfTable(['Tarefa','Paciente','Responsável','Prioridade','Status','Prazo'], tarefas.map(t => `<tr><td>${pfSafe(t.titulo)}<div style="font-size:.75rem;color:var(--text-3);">${pfSafe(t.descricao || '')}</div></td><td>${pfSafe(t.paciente?.nome || '-')}</td><td>${pfSafe(t.responsavel?.nome || '-')}</td><td>${pfSafe(t.prioridade)}</td><td>${pfBadge(t.status)}</td><td>${pfDate(t.prazo)}</td></tr>`), 'Nenhuma tarefa cadastrada no banco.'));
+}
+
+async function pfRenderSalas(){
+  const main = pfPageMain('page-salas'); if(!main) return;
+  const espacos = await pfGet('/espacos', []);
+  const reservas = await pfGet('/espacos/reservas', []);
+  const actions = pfCanAdmin() ? `<button class="btn-sm-custom btn-primary-sm" onclick="abrirModalSalaApi()"><i class="bi bi-plus-lg"></i> Nova sala</button>` : '';
+  main.innerHTML = pfHeader('Gestão de Espaços', actions) +
+    pfCard('Salas e recursos', pfTable(['Sala','Capacidade','Recursos','Status','Reservas'], espacos.map(e => `<tr><td>${pfSafe(e.nome)}<div style="font-size:.75rem;color:var(--text-3);">${pfSafe(e.descricao || '')}</div></td><td>${e.capacidade || '-'}</td><td>${pfSafe(e.recursos || '-')}</td><td>${pfBadge(e.status)}</td><td>${e.reservas?.length || reservas.filter(r=>r.espacoId===e.id).length || 0}</td></tr>`), 'Nenhuma sala cadastrada no banco.')) +
+    pfCard('Reservas de salas', pfTable(['Sala','Paciente/Sessão','Início','Fim','Observações'], reservas.map(r => `<tr><td>${pfSafe(r.espaco?.nome || '-')}</td><td>${pfSafe(r.sessao?.paciente?.nome || '-')}</td><td>${pfDateTime(r.inicio)}</td><td>${pfDateTime(r.fim)}</td><td>${pfSafe(r.observacoes || '')}</td></tr>`), 'Nenhuma reserva cadastrada no banco.'));
+}
+
+async function pfRenderPlanos(){
+  const main = pfPageMain('page-planos'); if(!main) return;
+  const planos = await pfGet('/planos', []);
+  const pacientes = await pfGet('/planos/pacientes', []);
+  const actions = pfCanAdmin() ? `<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-sm-custom btn-primary-sm" onclick="openModal('modalPlanoApi')"><i class="bi bi-plus-lg"></i> Novo plano</button><button class="btn-sm-custom btn-outline-sm" onclick="abrirModalAtribuirPlanoApi()"><i class="bi bi-person-check"></i> Atribuir plano</button></div>` : '';
+  main.innerHTML = pfHeader('Planos por Cliente', actions) +
+    `<div class="row g-3 mb-4">${planos.length ? planos.map(p => `<div class="col-md-4"><div class="card-custom"><h2 style="font-size:1rem;font-weight:700;">${pfSafe(p.nome)}</h2><div style="font-size:1.5rem;font-weight:800;color:var(--primary);">${pfMoney(p.valor)}</div><div style="color:var(--text-3);font-size:.85rem;">${p.quantidadeSessoes} sessões · ${p.descontoPercentual || 0}% desconto</div><p style="margin-top:10px;color:var(--text-2);font-size:.86rem;">${pfSafe(p.descricao || '')}</p></div></div>`).join('') : '<div class="col-12">'+pfEmpty('Nenhum plano cadastrado no banco.')+'</div>'}</div>` +
+    pfCard('Pacientes por Plano', pfTable(['Paciente','Plano','Sessões usadas','Restantes','Validade','Status'], pacientes.map(pp => `<tr><td>${pfSafe(pp.paciente?.nome || '-')}</td><td>${pfSafe(pp.plano?.nome || '-')}</td><td>${pp.sessoesUtilizadas} / ${pp.sessoesContratadas}</td><td>${Math.max((pp.sessoesContratadas||0)-(pp.sessoesUtilizadas||0),0)}</td><td>${pfDate(pp.dataFim)}</td><td>${pfBadge(pp.status)}</td></tr>`), 'Nenhum plano atribuído a paciente.'));
+}
+
+async function pfRenderAuditoria(){
+  const main = pfPageMain('page-auditoria'); if(!main) return;
+  const data = await pfGet('/auditoria', { eventos: [] });
+  main.innerHTML = pfHeader('Auditoria & Logs do Sistema', `<button class="btn-sm-custom btn-outline-sm" onclick="window.print()"><i class="bi bi-download"></i> Exportar log</button>`) +
+    pfCard('Eventos recentes do banco', pfTable(['Data','Usuário','Ação','Módulo','Detalhe'], (data.eventos || []).map(e => `<tr><td>${pfDateTime(e.data)}</td><td>${pfSafe(e.usuario)}</td><td>${pfSafe(e.acao)}</td><td>${pfSafe(e.modulo)}</td><td>${pfSafe(e.detalhe)}</td></tr>`), 'Nenhum evento de auditoria retornado pelo backend.'));
+}
+
+async function pfRenderConfiguracoes(){
+  const main = pfPageMain('page-configuracoes'); if(!main) return;
+  const u = getUser();
+  const clinica = await pfGet('/configuracoes/clinica', {});
+  const actions = pfCanAdmin() ? `<button class="btn-sm-custom btn-primary-sm" onclick="abrirModalClinicaApi()"><i class="bi bi-pencil-square"></i> Editar clínica</button>` : '';
+  main.innerHTML = pfHeader('Configurações do Sistema', actions) +
+    `<div class="card-custom" style="padding:20px;"><h2 style="font-size:1rem;font-weight:700;margin-bottom:18px;">Perfil do Usuário</h2><div class="row g-3"><div class="col-md-6"><label class="form-label">Nome completo</label><input class="form-control" value="${pfSafe(u.nome || '')}" readonly></div><div class="col-md-6"><label class="form-label">E-mail</label><input class="form-control" value="${pfSafe(u.email || '')}" readonly></div><div class="col-md-6"><label class="form-label">Função / Cargo</label><input class="form-control" value="${pfSafe(getCurrentUserInfo().role)}" readonly></div></div></div>` +
+    `<div class="card-custom" style="padding:20px;margin-top:16px;"><h2 style="font-size:1rem;font-weight:700;margin-bottom:18px;">Dados da Clínica</h2><div class="row g-3"><div class="col-md-6"><label class="form-label">Nome da clínica</label><input class="form-control" value="${pfSafe(clinica?.nome || '')}" readonly></div><div class="col-md-6"><label class="form-label">CNPJ</label><input class="form-control" value="${pfSafe(clinica?.cnpj || '')}" readonly></div><div class="col-md-6"><label class="form-label">Telefone</label><input class="form-control" value="${pfSafe(clinica?.telefone || '')}" readonly></div><div class="col-md-6"><label class="form-label">E-mail</label><input class="form-control" value="${pfSafe(clinica?.email || '')}" readonly></div><div class="col-12"><label class="form-label">Endereço</label><input class="form-control" value="${pfSafe(clinica?.endereco || '')}" readonly></div></div></div>`;
+}
+
+// Remove definitivamente mensagens genéricas de endpoint e direciona para formulários reais.
+pfActionToast = function(endpoint){
+  const e = String(endpoint || '').toLowerCase();
+  if(e.includes('document')) return abrirModalDocumentoApi();
+  if(e.includes('comunic')) return abrirModalMensagemApi();
+  if(e.includes('taref')) return abrirModalTarefaApi();
+  if(e.includes('espaco')) return abrirModalSalaApi();
+  if(e.includes('plano')) return openModal('modalPlanoApi');
+  showToast('Ação conectada ao banco de dados.', 'info');
+};
+
+const pfLoaderBackendOriginalFinal = carregarDadosDaPagina;
+carregarDadosDaPagina = async function(pageId){
+  if(!getToken()) return;
+  const direct = {
+    'page-documentos': pfRenderDocumentos,
+    'page-comunicacao': pfRenderComunicacao,
+    'page-tarefas': pfRenderTarefas,
+    'page-salas': pfRenderSalas,
+    'page-relatorios': pfRenderRelatorios,
+    'page-configuracoes': pfRenderConfiguracoes,
+    'page-planos': pfRenderPlanos,
+    'page-auditoria': pfRenderAuditoria
+  };
+  if(direct[pageId]) { await direct[pageId](); return; }
+  await pfLoaderBackendOriginalFinal(pageId).catch(e => console.warn('Loader antigo falhou:', e));
   limparElementosComTextoEstatico(document.getElementById(pageId) || document);
 };
